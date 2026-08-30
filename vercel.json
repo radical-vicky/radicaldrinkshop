@@ -1,0 +1,9 @@
+{
+  "builds": [
+    {
+      "src": "drinkshop/wsgi.py",
+      "use": "@vercel/python"
+    }
+  ],
+  "buildCommand": "python manage.py collectstatic --noinput && python manage.py migrate --noinput"
+}
