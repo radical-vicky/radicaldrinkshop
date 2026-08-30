@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+{% block title %}Order #{{ order.id }} — DrinkShop{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="page-head">
+        <span class="eyebrow">Order #{{ order.id }}</span>
+        <h1>Order status: {{ order.get_status_display }}</h1>
+    </div>
+
+    <div class="form-card wide">
+        <p>Delivering to: {{ order.delivery_address.as_text }}</p>
+        {% if order.delivery_address.has_gps %}
+            <p><a href="{{ order.delivery_address.maps_url }}" target="_blank" rel="noopener"><svg style="width:13px;height:13px;vertical-align:-2px"><use href="#icon-pin"/></svg> View pinned drop-off location</a></p>
+        {% endif %}
+        <p>Phone: {{ order.phone_number }}</p>
+
+        <table class="cart-table">
+            <thead><tr><th>Product</th><th>Unit price</th><th>Qty</th><th>Subtotal</th></tr></thead>
+            <tbody>
+            {% for item in order.items.all %}
+                <tr>
+                    <td>{{ item.product.name }}</td>
+                    <td>KES {{ item.unit_price }}</td>
+                    <td>{{ item.quantity }}</td>
+                    <td>KES {{ item.subtotal }}</td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+
+        <div class="cart-summary" style="margin-left:auto">
+            <p>Subtotal: KES {{ order.subtotal }}</p>
+            <p>Delivery fee: KES {{ order.delivery_fee }}</p>
+            <p class="total">Total: KES {{ order.total }}</p>
+        </div>
+    </div>
+</div>
+{% endblock %}

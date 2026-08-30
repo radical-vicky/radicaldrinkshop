@@ -1,0 +1,175 @@
+{% extends "base.html" %}
+{% block title %}DrinkShop — cold drinks, delivered{% endblock %}
+
+{% block content %}
+{% if hero_slides %}
+<section class="hero" id="hero">
+    {% for slide in hero_slides %}
+    <div class="hero-slide {% if forloop.first %}is-active{% endif %}" data-theme="{{ slide.theme }}">
+        <div class="hero-slide-bg"></div>
+        <div class="hero-content">
+            <span class="hero-badge"><svg style="width:14px;height:14px"><use href="#icon-ticket"/></svg>{{ slide.badge }}</span>
+            <h2>{{ slide.headline }}</h2>
+            <p>{{ slide.description|truncatechars:140 }}</p>
+            <a href="{{ slide.product.get_absolute_url }}" class="btn btn-{{ slide.theme }}">
+                Shop now <svg style="width:16px;height:16px"><use href="#icon-arrow-right"/></svg>
+            </a>
+        </div>
+        {% if slide.product.image %}
+            <img class="hero-art hero-art-photo" src="{{ slide.product.image.url }}" alt="{{ slide.product.name }}">
+        {% else %}
+            <svg class="hero-art hero-art-icon theme-{{ slide.theme }}" viewBox="0 0 24 24"><use href="#icon-bottle"/></svg>
+        {% endif %}
+    </div>
+    {% endfor %}
+
+    {% if hero_slides|length > 1 %}
+        <div class="hero-nav" id="hero-dots">
+            {% for slide in hero_slides %}
+                <button class="hero-dot {% if forloop.first %}is-active{% endif %}" data-slide="{{ forloop.counter0 }}" aria-label="Slide {{ forloop.counter }}"></button>
+            {% endfor %}
+        </div>
+        <div class="hero-arrows">
+            <button class="hero-arrow" id="hero-prev" aria-label="Previous slide"><svg><use href="#icon-chevron-left"/></svg></button>
+            <button class="hero-arrow" id="hero-next" aria-label="Next slide"><svg><use href="#icon-chevron-right"/></svg></button>
+        </div>
+    {% endif %}
+</section>
+{% endif %}
+
+<div class="marquee" aria-hidden="true">
+    <div class="marquee-track">
+        <span>Free delivery on orders over KES 2,000</span>
+        <span>Pay safely with M-Pesa</span>
+        <span>Same-day delivery across Nairobi</span>
+        <span>New: energy drinks restocked</span>
+        <span>Refer a friend, get KES 100 credit</span>
+        <span>Free delivery on orders over KES 2,000</span>
+        <span>Pay safely with M-Pesa</span>
+        <span>Same-day delivery across Nairobi</span>
+        <span>New: energy drinks restocked</span>
+        <span>Refer a friend, get KES 100 credit</span>
+    </div>
+</div>
+
+<div class="container">
+    <section class="reveal" id="offers">
+        <div class="section-head">
+            <div>
+                <span class="eyebrow">Offers &amp; vouchers</span>
+                <h3>Deals worth clipping</h3>
+            </div>
+            <span class="sub">Codes apply automatically at checkout on eligible orders</span>
+        </div>
+        <div class="offers-grid">
+            <div class="offer-card" data-tone="green">
+                <span class="kicker">First order</span>
+                <h4>20% off your first cart</h4>
+                <p>New customers save on any order over KES 1,000. Applies to non-alcoholic drinks.</p>
+                <div class="voucher-code"><code>WELCOME20</code><svg style="width:18px;height:18px;color:#45D68A"><use href="#icon-ticket"/></svg></div>
+            </div>
+            <div class="offer-card" data-tone="orange">
+                <span class="kicker">This week</span>
+                <h4>Free delivery over KES 2,000</h4>
+                <p>Stock up on juices and sodas — delivery fee waived automatically at that cart size.</p>
+                <div class="voucher-code"><code>FREESHIP</code><svg style="width:18px;height:18px;color:#FF8A3D"><use href="#icon-truck"/></svg></div>
+            </div>
+            <div class="offer-card" data-tone="gold">
+                <span class="kicker">Gifting</span>
+                <h4>Send a drinks hamper</h4>
+                <p>Pick a friend's saved address and we deliver the crate with a gift note attached.</p>
+                <div class="voucher-code"><code>GIFTIT</code><svg style="width:18px;height:18px;color:#E8B93C"><use href="#icon-gift"/></svg></div>
+            </div>
+        </div>
+    </section>
+
+    <section class="reveal" id="shop">
+        <div class="section-head">
+            <div>
+                <span class="eyebrow">The shop</span>
+                <h3>{% if selected_category %}{{ selected_category.name }}{% else %}All drinks{% endif %}</h3>
+            </div>
+        </div>
+        <div class="shop-layout">
+            <aside class="sidebar">
+                <h3>Categories</h3>
+                <ul class="category-list">
+                    <li><a href="{% url 'store:home' %}#shop" class="{% if not selected_category %}active{% endif %}">All drinks</a></li>
+                    {% for category in categories %}
+                        <li>
+                            <a href="?category={{ category.slug }}#shop" class="{% if selected_category == category %}active{% endif %}">
+                                {{ category.name }}
+                            </a>
+                        </li>
+                    {% endfor %}
+                </ul>
+            </aside>
+
+            <section class="product-grid">
+                {% for product in products %}
+                    <article class="product-card">
+                        <a href="{{ product.get_absolute_url }}">
+                            {% if product.image %}
+                                <img src="{{ product.image.url }}" alt="{{ product.name }}">
+                            {% else %}
+                                <div class="img-placeholder"><svg viewBox="0 0 24 24" style="color:#45D68A"><use href="#icon-bottle"/></svg></div>
+                            {% endif %}
+                            <h4>{{ product.name }}</h4>
+                        </a>
+                        <p class="price">KES {{ product.price }}</p>
+                        {% if not product.is_deliverable %}
+                            <p class="badge badge-warning">Delivery unavailable</p>
+                        {% elif not product.in_stock %}
+                            <p class="badge badge-muted">Out of stock</p>
+                        {% else %}
+                            <form action="{% url 'store:cart_add' product.id %}" method="post">
+                                {% csrf_token %}
+                                <input type="hidden" name="quantity" value="1">
+                                <input type="hidden" name="next" value="{{ request.path }}">
+                                <button type="submit" class="btn btn-small">Add to cart</button>
+                            </form>
+                        {% endif %}
+                    </article>
+                {% empty %}
+                    <p>No drinks available in this category yet.</p>
+                {% endfor %}
+            </section>
+        </div>
+    </section>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+{% if hero_slides|length > 1 %}
+<script>
+(function () {
+    const slides = document.querySelectorAll('.hero-slide');
+    const dots = document.querySelectorAll('.hero-dot');
+    let current = 0;
+    let timer;
+
+    function show(index) {
+        slides[current].classList.remove('is-active');
+        dots[current].classList.remove('is-active');
+        current = (index + slides.length) % slides.length;
+        slides[current].classList.add('is-active');
+        dots[current].classList.add('is-active');
+    }
+
+    function next() { show(current + 1); }
+    function prev() { show(current - 1); }
+
+    function restart() {
+        clearInterval(timer);
+        timer = setInterval(next, 5500);
+    }
+
+    document.getElementById('hero-next').addEventListener('click', () => { next(); restart(); });
+    document.getElementById('hero-prev').addEventListener('click', () => { prev(); restart(); });
+    dots.forEach(dot => dot.addEventListener('click', () => { show(parseInt(dot.dataset.slide, 10)); restart(); }));
+
+    restart();
+})();
+</script>
+{% endif %}
+{% endblock %}

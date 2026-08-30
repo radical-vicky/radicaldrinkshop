@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% block title %}My orders — DrinkShop{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="page-head">
+        <span class="eyebrow">Account</span>
+        <h1>My orders</h1>
+    </div>
+
+    <div class="form-card wide">
+        <table class="cart-table">
+            <thead><tr><th>Order</th><th>Status</th><th>Total</th><th>Placed</th><th></th></tr></thead>
+            <tbody>
+            {% for order in orders %}
+                <tr>
+                    <td>#{{ order.id }}</td>
+                    <td><span class="badge">{{ order.get_status_display }}</span></td>
+                    <td>KES {{ order.total }}</td>
+                    <td>{{ order.created_at|date:"d M Y, H:i" }}</td>
+                    <td><a href="{% url 'orders:order_detail' order.id %}">View</a></td>
+                </tr>
+            {% empty %}
+                <tr><td colspan="5">No orders yet.</td></tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}
