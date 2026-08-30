@@ -96,13 +96,16 @@ WSGI_APPLICATION = 'drinkshop.wsgi.application'
 # Defaults to SQLite for easy local dev. Point DATABASE_URL-style env vars
 # at Postgres/MySQL in production (see README).
 # ---------------------------------------------------------------------------
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
-    }
-}
+import os
+import dj_database_url
 
+DATABASES = {
+    'default': dj_database_url.config(
+        default=os.environ.get('DATABASE_URL'),
+        conn_max_age=600,
+        conn_health_checks=True,
+    )
+}
 # ---------------------------------------------------------------------------
 # Password validation
 # ---------------------------------------------------------------------------
